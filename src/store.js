@@ -1,14 +1,13 @@
-import { createStore, applyMiddleware, combineReducers } from "redux";
+import { createStore, applyMiddleware, compose } from "redux";
 import thunk from "redux-thunk";
 import logger from "redux-logger";
-import promise from "redux-promise-middleware";
-import { reducer as formReducer } from "redux-form";
-import rootReducer from "./reducers";
+// import promise from "redux-promise-middleware";
+import { wait2plateReducer } from "./reducers";
 
 const middleware = applyMiddleware(thunk, logger);
 
-const reducers = { form: formReducer, app: rootReducer };
+const composeEnhancers = window.__REDUX_DEVTOOLS_EXTENSION_COMPOSE__ || compose;
 
-const reducer = combineReducers(reducers);
+const store = createStore(wait2plateReducer, composeEnhancers(middleware));
 
-export default createStore(reducer, middleware);
+export default store;

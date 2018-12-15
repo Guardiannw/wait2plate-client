@@ -3,166 +3,29 @@ import * as actions from "../actions";
 const initialState = {
   fetching: false,
   fetched: false,
-  users: [
-    {
-      id: 1,
-      username: "test",
-      email: "test@test.com",
-      password: "password123",
-      points: 55,
-      reports: []
-    }
-  ],
-  token: "",
-  reports: [
-    {
-      id: 100,
-      user_id: 1,
-      restaurantId: 1000,
-      restaurantName: "Dave's Cafe",
-      time: 525000,
-      date: "October 2, 2018"
-    }
-  ],
-  points: [],
-  restaurants: [
-    {
-      id: 101,
-      name: "Bill Bob's Burgers",
-      address: "123 Main St. Lehi, UT 84043",
-      distance: "1.4 mi",
-      reported_times: [392000, 420000, 498000]
-    },
-    {
-      id: 102,
-      name: "Grace's Bakery",
-      address: "3 Main St. Lehi, UT 84043",
-      distance: "2.4 mi",
-      reported_times: [465000, 594000]
-    },
-    {
-      id: 103,
-      name: "Stevo's Bar and Grill",
-      address: "100 Center St. Lehi, UT 84043",
-      distance: "0.5 mi",
-      reported_times: [780000]
-    }
-  ],
+  user: '',
+  token: {
+    "authToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjp7ImlkIjoiNWMwZGY5NmJmNGJiOTczMWM4ZmI1YTE0IiwidXNlcm5hbWUiOiJUZXN0IiwiZW1haWwiOiJ0ZXN0QHRlc3QuY29tIiwicG9pbnRzIjoxLCJyZXBvcnRzIjpbIjVjMGRmOTg1ZjRiYjk3MzFjOGZiNWExNSJdfSwiaWF0IjoxNTQ0NDIwOTQzLCJleHAiOjE1NDUwMjU3NDMsInN1YiI6IlRlc3QifQ.zfXS0J-SJMM-8zyAV9XTyYDmHbDh8B5En9SZ6HoMMnQ"
+  },
+  reports: [],
+  points: 0,
+  restaurants: [],
+  restaurant: {
+    name: '',
+    id: ''
+  },
+  latitude: "",
+  longitude: "",
   error: null
 };
 
-// Reports Data
-// [{
-//   id: 1001,
-//   user_id: 1,
-//   restaurant_id: 101,
-//   time: 392000,
-//   date: Date.now()
-// },
-// {
-//   id: 1002,
-//   user_id: 2,
-//   restaurant_id: 101,
-//   time: 420000,
-//   date: Date.now()
-// },
-// {
-//   id: 1003,
-//   user_id: 1,
-//   restaurant_id: 101,
-//   time: 498000,
-//   date: Date.now()
-// },
-// {
-//   id: 1004,
-//   user_id: 3
-//   restaurant_id: 102,
-//   time: 465000,
-//   date: Date.now()
-// },
-// {
-//   id: 1005,
-//   user_id: 2,
-//   restaurant_id: 102,
-//   time: 594000,
-//   date: Date.now()
-// },
-// {
-//   id: 1006,
-//   user_id: 3,
-//   restaurant_id: 103,
-//   time: 780000,
-//   date: Date.now()
-// }
-// ]
-// Restaurant Data
-// [{
-//   id: 101,
-//   name: "Bill Bob's Burgers",
-//   address: "123 Main St. Lehi, UT 84043",
-//   distance: "1.4 mi",
-//   reported_times: [392000, 420000, 498000]
-
-// },
-// {
-//   id: 102,
-//   name: "Grace's Bakery",
-//   address: "3 Main St. Lehi, UT 84043",
-//   distance: "2.4 mi",
-//   reported_times: [465000, 594000]
-// },
-// {
-//   id: 103,
-//   name: "Stevo's Bar and Grill",
-//   address: "100 Center St. Lehi, UT 84043",
-//   distance: "0.5 mi",
-//   reported_times: [780000]
-// }];
-// // User Data
-// users: [{
-//  id: 1,
-//  username: "test",
-//  email: "test@test.com",
-//  password: "password123",
-//  points: 55,
-//  reports: [{
-//    id: 100,
-//    restaurantId: 1000,
-//    restaurantName: "Dave's Cafe",
-//    time: 525000,
-//    date: "October 2, 2018"
-// }]
-// }, {
-//  id: 2,
-//  username: "john",
-//  email: "john@john.com",
-//  password: "password123",
-//  points: 12,
-//  reports: [{
-//    id: 101,
-//    restaurantId: 1001,
-//    restaurantName: "Bill's Shop",
-//    time: 726000,
-//    date: "October 3, 2018"
-// }]
-// }, {
-//  id: 3,
-//  username: "amanda",
-//  email: 'amanda@amanda.com',
-//  password: 'password123',
-//  points: 7,
-//  reports: [{
-//    id: 102,
-//    restaurantId: 1002,
-//    time: 1128000,
-//    date: 'October 4, 2018'
-// }]
-// }]
-
-export default (state = initialState, action) => {
+export const wait2plateReducer = (state = initialState, action) => {
   switch (action.type) {
     case actions.ADD_POINT:
-      return { ...state, points: action.points };
+      return { ...state, points: Math.floor(state.points + 1) };
+
+    case actions.CLEAR_ERROR:
+      return { ...state, error: null };
 
     case actions.DELETE_TIME_ACTION:
       return {
@@ -191,17 +54,20 @@ export default (state = initialState, action) => {
     case actions.FETCHED_HAS_ERROR:
       return {
         ...state,
-        error: action.error,
+        error: action.error.message,
         fetching: false
       };
 
-    // case actions.FIND_RESTAURANTS:
-    //   return { ...state, restaurants: action.restaurants };
+    case actions.FIND_RESTAURANTS:
+      return { ...state, restaurants: action.restaurants };
 
-    case actions.GET_USERS:
+    case actions.SELECT_RESTAURANT:
+      return { ...state, restaurant: { name: action.name, id: action.id } }
+
+    case actions.GET_USER:
       return {
         ...state,
-        users: action.users
+        user: action.user
       };
 
     case actions.GET_USER_REPORTS:
@@ -212,6 +78,13 @@ export default (state = initialState, action) => {
 
     case actions.LOGIN_ACTION:
       return { ...state, token: action.JWT };
+
+    case actions.SET_GEOLOCATION:
+      return {
+        ...state,
+        latitude: action.latitude,
+        longitude: action.longitude
+      }
 
     case actions.SIGN_UP_ACTION:
       return { ...state, token: action.JWT };

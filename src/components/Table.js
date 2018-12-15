@@ -1,33 +1,64 @@
 import React from "react";
+import moment from "moment";
+import { connect } from 'react-redux'
+import { editTimeThunk, deleteTimeThunk } from "../actions"
 
-export default class Table extends React.Component {
+export class Table extends React.Component {
+  constructor(props) {
+    super(props)
+    this.state = {
+      showModal: false,
+      table: {}
+    }
+    this.handleCloseModal = this.handleCloseModal.bind(this)
+    this.handleOpenModal = this.handleOpenModal.bind(this)
+    this.handleEdit = this.handleEdit.bind(this)
+    this.handleDelete = this.handleDelete.bind(this)
+  }
+
+  handleOpenModal() {
+    this.setState({ showModal: true })
+  }
+
+  handleCloseModal() {
+    this.setState({ showModal: false })
+  }
+
+  handleEdit() {
+
+  }
+
+  handleDelete() {
+
+  }
+
   render() {
-    function millisToMinutesAndSeconds(millis) {
-      const minutes = Math.floor(millis / 60000);
-      const seconds = ((millis % 60000) / 1000).toFixed(0);
+    function secondsToMinutesAndSeconds(seconds) {
+      const minutes = Math.floor(seconds / 60);
       return minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
     }
-
     const data = this.props.reports.filter(
       report => report.user_id === this.props.user.id
     );
 
     let tableData = data.map(datum => {
-      let time = millisToMinutesAndSeconds(datum.time);
+      let time = secondsToMinutesAndSeconds(datum.time);
+      let date = moment(datum.date).format("MMMM D, YYYY")
       return (
-        <tr>
-          <td>{datum.restaurantName}</td>
+        <tr key={Math.random()}>
+          <td>{datum.restaurant_name}</td>
           <td>{time}</td>
-          <td>{datum.date}</td>
+          <td>{date}</td>
           <td>
-            <button>Edit</button>
+            <button type="button" onClick={this.handleEdit}>Edit</button>
           </td>
           <td>
-            <button>Delete</button>
+            <button type="button" onClick={this.handleDelete}>Delete</button>
           </td>
         </tr>
       );
     });
+
 
     return (
       <table>
@@ -45,3 +76,17 @@ export default class Table extends React.Component {
     );
   }
 }
+
+const mapStateToProps = state => ({
+  reports: state.reports,
+  user: state.user
+});
+
+const mapDispatchtoProps = {
+  editTimeThunk, deleteTimeThunk
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchtoProps
+)(Table);

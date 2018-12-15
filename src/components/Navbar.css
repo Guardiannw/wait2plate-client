@@ -1,19 +1,44 @@
 nav {
-  background-color: #b10b0b;
-  height: 60px;
+  background-color: #C23333;
+  height: 40px;
 }
 
 li {
   display: inline-block;
-  font-size: 18px;
-  padding: 10px;
-  margin: 10px 10px 5px;
+  font-size: 16px;
+  padding: 5px;
+  margin: 5px 10px 5px;
 }
 
 a {
   text-decoration: none;
+  color: #fff4dc;
 }
 
 a:visited {
   color: #fff;
+}
+
+@media only screen and (min-width: 767px) {
+  nav {
+    height: 50px;
+  }
+
+  li {
+    font-size: 18px;
+    padding: 8px;
+    margin: 8px 10px 5px;
+  }
+}
+
+@media only screen and (min-width: 1024px) {
+  nav {
+    height: 60px;
+  }
+
+  li {
+    font-size: 18px;
+    padding: 10px;
+    margin: 10px 10px 5px;
+  }
 }

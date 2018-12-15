@@ -1,5 +1,5 @@
 import {
-  getAllUsers,
+
   searchRestaurants,
   accountUser,
   reportTime,
@@ -56,10 +56,10 @@ export const reportTimeAction = reports => ({
   reports
 });
 
-export const GET_USERS = "GET_USERS";
-export const getUsers = users => ({
-  type: GET_USERS,
-  users
+export const GET_USER = "GET_USER";
+export const getUser = user => ({
+  type: GET_USER,
+  user
 });
 
 export const GET_USER_REPORTS = "GET_USER_REPORTS";
@@ -81,40 +81,58 @@ export const signupAction = JWT => ({
   JWT
 });
 
-export const getUsersThunk = () => async (dispatch, getState) => {
-  dispatch(fetching());
-  const JWT = getState().token;
-  const users = await getAllUsers(JWT);
-  dispatch(getUsers(users));
-  dispatch(fetched());
-};
+export const CLEAR_ERROR = "CLEAR_ERROR";
+export const clearError = () => ({
+  type: CLEAR_ERROR
+});
 
-export const getRestaurantsThunk = (geolocation, cityState) => async (
+export const SET_GEOLOCATION = "SET_GEOLOCATION";
+export const setGeolocation = (latitude, longitude) => ({
+  type: SET_GEOLOCATION,
+  latitude,
+  longitude
+})
+
+export const SELECT_RESTAURANT = "SELECT_RESTAURANT";
+export const selcectRestaurant = (name, id) => ({
+  type: SELECT_RESTAURANT,
+  name,
+  id
+})
+
+export const getRestaurantsThunk = (cityState, latitude, longitude) => async (
   dispatch,
   getState
 ) => {
   dispatch(fetching());
-  const JWT = getState().token;
-  const restaurants = await searchRestaurants({ geolocation, cityState, JWT });
-  dispatch(findRestaurants(restaurants));
+  const JWT = getState().token.authToken;
+  const restaurants = await searchRestaurants({
+    cityState,
+    latitude,
+    longitude
+  });
+  if (restaurants.id !== 0) {
+    dispatch(findRestaurants(restaurants));
+  }
   dispatch(fetched());
 };
 
-export const reportTimeThunk = (time, restaurant) => async (
+export const reportTimeThunk = (time, restaurant_id, restaurant_name) => async (
   dispatch,
   getState
 ) => {
   dispatch(fetching());
-  const JWT = getState().token;
-  const points = await reportTime(restaurant, time, JWT);
-  dispatch(addPoint(points));
+  const JWT = getState().token.authToken;
+  await reportTime(restaurant_id, restaurant_name, time, JWT);
+  dispatch(addPoint());
   dispatch(fetched());
 };
 
 export const accountUserThunk = () => async (dispatch, getState) => {
   dispatch(fetching());
-  const JWT = getState().token;
-  const { reports, points } = await accountUser(JWT);
+  const JWT = getState().token.authToken;
+  const { reports, points, user } = await accountUser(JWT);
+  dispatch(getUser(user))
   dispatch(getUserReports(reports, points));
   dispatch(fetched);
 };
@@ -124,29 +142,39 @@ export const editTimeThunk = (reportId, newTime) => async (
   getState
 ) => {
   dispatch(fetching());
-  const JWT = getState().token;
+  const JWT = getState().token.authToken;
   await editTime(JWT, reportId, newTime);
   dispatch(editTimeAction);
 };
 
 export const deleteTimeThunk = reportId => async (dispatch, getState) => {
   dispatch(fetching());
-  const JWT = getState().token;
+  const JWT = getState().token.authToken;
   await deleteTime(JWT, reportId);
   dispatch(deleteTimeAction(reportId));
   dispatch(fetched());
 };
 
 export const loginThunk = (username, pass) => async dispatch => {
+  dispatch(clearError());
   dispatch(fetching());
-  const JWT = await login(username, pass);
-  dispatch(loginAction(JWT));
-  dispatch(fetched());
+  try {
+    const user = await login(username, pass);
+    dispatch(loginAction(user));
+    dispatch(fetched());
+  } catch (error) {
+    dispatch(fetchedHasError(error));
+  }
 };
 
 export const signupThunk = (username, email, pass) => async dispatch => {
+  dispatch(clearError());
   dispatch(fetching());
-  const JWT = await signup(username, email, pass);
-  dispatch(signupAction(JWT));
-  dispatch(fetched());
+  try {
+    const user = await signup(username, email, pass);
+    dispatch(signupAction(user));
+    dispatch(fetched());
+  } catch (error) {
+    dispatch(fetchedHasError(error));
+  }
 };

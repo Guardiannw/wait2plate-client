@@ -1,50 +1,65 @@
 import React from "react";
 import { connect } from "react-redux";
+import { getRestaurantsThunk, selcectRestaurant } from "../actions";
 
-import {
-  FIND_RESTAURANTS,
-  FETCHED,
-  FETCHED_HAS_ERROR,
-  IS_FETCHING
-} from "../actions";
+import "./Restaurants.css"
 
 export class Restaurants extends React.Component {
   constructor(props) {
     super(props);
+    this.state = {
+      cityState: ""
+    }
   }
 
-  goToTimer(event) {
+  handleSearch = async e => {
+    e.preventDefault();
+    const { cityState } = this.state;
+    try {
+      await this.props.getRestaurantsThunk(cityState);
+      this.setState({ cityState: "" });
+    } catch (error) {
+      this.setState({ error: error.message });
+    }
+  };
+
+  goToTimer(event, name, id) {
     event.preventDefault();
+    this.props.selcectRestaurant(name, id)
     this.props.history.push(`/timer`);
   }
 
+  componentDidMount() {
+    this.props.getRestaurantsThunk(this.state.cityState, this.props.latitude, this.props.longitude);
+  }
+
   render() {
-    function millisToMinutesAndSeconds(millis) {
-      const minutes = Math.floor(millis / 60000);
-      const seconds = ((millis % 60000) / 1000).toFixed(0);
-      return minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+    function secondsToMinutesAndSeconds(reportSeconds) {
+      {
+        const minutes = Math.floor(reportSeconds / 60);
+        const seconds = Math.floor(reportSeconds - (minutes * 60))
+        return minutes + ":" + (seconds < 10 ? "0" : "") + seconds;
+      }
     }
 
-    const restaurantData = this.props.restaurants.map(restaurant => {
-      function average(times) {
-        return (
-          times.reduce(function(a, b) {
-            return a + b;
-          }) / times.length
-        );
-      }
-      let average_time = average(restaurant.reported_times);
+    function metersToMiles(meters) {
+      const distance = meters / 1609.344;
+      return `${distance.toFixed(2)} Miles`;
+    }
 
-      let times = millisToMinutesAndSeconds(average_time);
-
+    const restaurants = this.props.restaurants.map(restaurant => {
       return (
-        <tr>
+        <tr key={restaurant.id}>
           <td>{restaurant.name}</td>
-          <td>{restaurant.address}</td>
-          <td>{restaurant.distance}</td>
-          <td>{times}</td>
+          <td>{restaurant.display_address}</td>
+          <td>{metersToMiles(restaurant.distance)}</td>
+          {
+            restaurant.reported_times === 'No times reported.'
+              ? <td>{restaurant.reported_times}</td>
+              : <td>{secondsToMinutesAndSeconds(restaurant.reported_times)}</td>
+          }
           <td>
-            <button onClick={e => this.goToTimer(e)}>Report</button>
+            <button onClick={(e) => this.goToTimer(e, restaurant.name, restaurant.id)}>Report</button>
           </td>
         </tr>
       );
@@ -57,8 +72,21 @@ export class Restaurants extends React.Component {
         </header>
 
         <section>
-          <h3>List</h3>
-          <table>
+          <h3 className="restaurant-list">Search</h3>
+          <label>Search by City</label>
+          <input
+            placeholder="City, State"
+            type="text"
+            name="cityState"
+            id="cityState"
+            value={this.state.cityState}
+            onChange={e => {
+              this.setState({ cityState: e.target.value });
+            }}
+          />
+          <button className="search-btn" type="submit" onClick={this.handleSearch}>Search</button>
+          <h3 className="restaurant-list">List</h3>
+          <table className="text-list">
             <thead>
               <tr>
                 <th>Name</th>
@@ -68,7 +96,7 @@ export class Restaurants extends React.Component {
                 <th>Report Time</th>
               </tr>
             </thead>
-            <tbody>{restaurantData}</tbody>
+            <tbody>{restaurants}</tbody>
           </table>
         </section>
       </main>
@@ -76,8 +104,18 @@ export class Restaurants extends React.Component {
   }
 }
 
-const mapStatetoProps = state => ({
-  restaurants: state.restaurants
+const mapStateToProps = state => ({
+  restaurants: state.restaurants,
+  latitude: state.latitude,
+  longitude: state.longitude
 });
 
-export default connect(mapStatetoProps)(Restaurants);
+const mapDispatchtoProps = {
+  getRestaurantsThunk,
+  selcectRestaurant
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchtoProps
+)(Restaurants);

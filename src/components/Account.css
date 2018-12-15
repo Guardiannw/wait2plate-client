@@ -4,6 +4,8 @@ main {
 
 .points {
   margin-bottom: 10px;
+  font-weight: 600;
+  font-size: 18px;
 }
 
 table {
@@ -16,13 +18,13 @@ th {
   font-weight: bold;
 }
 
-td,
+/* td,
 th {
   border: 1px solid #dddddd;
   text-align: left;
   padding: 8px;
-}
+} */
 
 tr:nth-child(even) {
-  background-color: #f17272;
+  background-color: #f79595;
 }
